@@ -6,6 +6,7 @@ import org.example.ecomerce.DTO.OrderDto;
 import org.example.ecomerce.Entity.Orders;
 import org.example.ecomerce.Response.ApiResponse;
 import org.example.ecomerce.Service.Order.OrderService;
+import org.example.ecomerce.Service.User.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequestMapping("${api.prefix}/order")
 public class OrderController {
     private final OrderService orderService;
+    private final UserService userService;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -63,6 +65,17 @@ public class OrderController {
         try {
             orderService.DeleteOrder(userId,orderId);
             return ResponseEntity.ok().body(new ApiResponse("Order Deleted Successfully!",null));
+        }catch (ResourceNotFoundException e){
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
+    @DeleteMapping("/delete-all-user-orders")
+    public ResponseEntity<ApiResponse> DeleteAll(@RequestParam Long userId){
+        try {
+            userService.getUserById(userId);
+            orderService.DeleteAll(userId);
+            return ResponseEntity.ok().body(new ApiResponse("All orders Deleted !",null));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }

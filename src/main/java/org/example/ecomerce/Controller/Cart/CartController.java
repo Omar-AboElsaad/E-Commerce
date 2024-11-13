@@ -6,8 +6,10 @@ import org.example.ecomerce.DTO.CartDto;
 import org.example.ecomerce.DTO.CartItemDto;
 import org.example.ecomerce.Entity.Cart;
 import org.example.ecomerce.Entity.CartItem;
+import org.example.ecomerce.Entity.User;
 import org.example.ecomerce.Response.ApiResponse;
 import org.example.ecomerce.Service.Cart.CartService;
+import org.example.ecomerce.Service.User.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +27,13 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class CartController {
     private final CartService cartService;
     private final ModelMapper modelMapper;
+    private final UserService userService;
 
 //--------------------------------------------------------------------------------------------------
 
 
     @PostMapping("/create")
-    public Long createNewCart(Long userId){
+    public Cart createNewCart(Long userId){
         return cartService.createNewCart(userId);
     }
 
@@ -38,11 +41,12 @@ public class CartController {
 
 
     @GetMapping("/view-cart")
-    public ResponseEntity<ApiResponse> viewCart(@RequestParam Long cartId) {
+    public ResponseEntity<ApiResponse> viewCart(@RequestParam Long userId) {
        try {
-            Cart cart = cartService.getcart(cartId);
+           User user=userService.getUserById(userId);
+            Cart cart = cartService.getcart(user.getCart().getId());
             CartDto cartDto=modelMapper.map(cart,CartDto.class);
-            cartDto.setCartItemsDto(new HashSet<>(convertCartItemToCartItemDto(cart.getCartItems())));
+            cartDto.setCartItems(new HashSet<>(convertCartItemToCartItemDto(cart.getCartItems())));
             return ResponseEntity.ok()
                     .body(new ApiResponse("Cart Found!", cartDto));
         }catch (ResourceNotFoundException e){
@@ -90,7 +94,7 @@ public class CartController {
     @GetMapping("/view-cart-by-user-id")
     public ResponseEntity<ApiResponse> viewCartByUserId(@RequestParam Long userId) {
         try {
-            CartDto cart = cartService.getCartByUserId(userId);
+            CartDto cart = cartService.getCartDTOByUserId(userId);
             return ResponseEntity.ok()
                     .body(new ApiResponse("Cart Found!", cart));
         }catch (ResourceNotFoundException e){

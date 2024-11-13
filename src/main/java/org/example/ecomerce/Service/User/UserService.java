@@ -3,29 +3,22 @@ package org.example.ecomerce.Service.User;
 import lombok.RequiredArgsConstructor;
 import org.example.ecomerce.CustomExceptions.ResourceAlreadyExistException;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
-import org.example.ecomerce.DTO.OrderDto;
-import org.example.ecomerce.DTO.OrderItemDto;
 import org.example.ecomerce.DTO.UserDto;
-import org.example.ecomerce.Entity.OrderItem;
-import org.example.ecomerce.Entity.Orders;
 import org.example.ecomerce.Entity.User;
 import org.example.ecomerce.Repository.UserRepo;
 import org.example.ecomerce.Requests.User.createUserRequest;
 import org.example.ecomerce.Requests.User.updateUserRequest;
-import org.example.ecomerce.Service.Order.OrderService;
-import org.example.ecomerce.Service.OrderItem.OrderItemService;
+import org.example.ecomerce.Service.Cart.CartService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
 @Service
 public class UserService implements IUserService{
     private final UserRepo userRepo;
+    private final ModelMapper modelMapper;
+//    private final CartService cartService;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -65,8 +58,10 @@ public class UserService implements IUserService{
                 user.setLastName(request.getLastName());
                 user.setEmail(request.getEmail());
                 user.setPassword(request.getPassword());
-              return userRepo.save(user);
+
+             return userRepo.save(user);
             }
+
 
     }
 
@@ -93,10 +88,10 @@ public class UserService implements IUserService{
       });
     }
 
-
-//    private UserDto ConvertUserToUserDto(User user){
-//        return modelMapper.map(user,UserDto.class);
-//    }
+    @Override
+    public UserDto ConvertUserToUserDto(User user){
+        return modelMapper.map(user,UserDto.class);
+    }
 
 //
 //    private List<OrderItem> GetOrderItem(Orders orders){

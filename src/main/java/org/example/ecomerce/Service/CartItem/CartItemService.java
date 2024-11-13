@@ -2,6 +2,7 @@ package org.example.ecomerce.Service.CartItem;
 
 import lombok.RequiredArgsConstructor;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
+import org.example.ecomerce.DTO.CartItemDto;
 import org.example.ecomerce.Entity.Cart;
 import org.example.ecomerce.Entity.CartItem;
 import org.example.ecomerce.Entity.Product;
@@ -9,6 +10,7 @@ import org.example.ecomerce.Repository.CartItemRepo;
 import org.example.ecomerce.Repository.CartRepo;
 import org.example.ecomerce.Service.Cart.CartService;
 import org.example.ecomerce.Service.Product.ProductService;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,13 +23,14 @@ public class CartItemService implements ICartItemService {
     private final CartRepo cartRepo;
     private final ProductService productService;
     private final CartService cartService;
+    private final ModelMapper modelMapper;
 
 //--------------------------------------------------------------------------------------------------
-
+    //Add item To Cart by getting user cart by user ID
 
     @Override
-    public void addItemToCart(Long cartId, Long productId, int quantity) {
-        Cart cart = cartService.getcart(cartId);
+    public void addItemToCart(Long userId, Long productId, int quantity) {
+        Cart cart = cartService.getCartByUserId(userId);
         Product product = productService.getProductById(productId);
         CartItem cartItem = cart.getCartItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
@@ -50,8 +53,8 @@ public class CartItemService implements ICartItemService {
 //--------------------------------------------------------------------------------------------------
 
         @Override
-        public void removeItemFromCart(Long cartId, Long itemId) {
-            Cart cart=cartService.getcart(cartId);
+        public void removeItemFromCart(Long userId, Long itemId) {
+            Cart cart=cartService.getCartByUserId(userId);
        CartItem cartItem=cart.getCartItems()
                .stream()
                .filter(item->item.getProduct().getId().equals(itemId))
@@ -65,8 +68,8 @@ public class CartItemService implements ICartItemService {
 
 
         @Override
-        public void updateItemQuantity(Long cartId, Long itemId, int Quantity) {
-            Cart cart=cartService.getcart(cartId);
+        public void updateItemQuantity(Long userId, Long itemId, int Quantity) {
+            Cart cart=cartService.getCartByUserId(userId);
             cart.getCartItems()
                     .stream()
                     .filter(item->item.getProduct().getId().equals(itemId))
@@ -92,18 +95,33 @@ public class CartItemService implements ICartItemService {
 //--------------------------------------------------------------------------------------------------
 
     @Override
-    public CartItem getCartItemByProductId(Long cartId,Long productId){
-        return cartItemRepo.findByProductIdAndCartId(productId, cartId)
+    public CartItemDto getCartItemByProductId(Long userId,Long productId){
+        Cart cart=cartService.getCartByUserId(userId);
+        CartItem cartItem= cartItemRepo.findByProductIdAndCartId(productId, cart.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("There is no Cart item with Id "+productId));
+        return modelMapper.map(cartItem, CartItemDto.class);
+    }
+
+//--------------------------------------------------------------------------------------------------
+
+//    @Override
+    public List<CartItemDto> getAllCartItems(Long cartId){
+        List<CartItem> cartItems=cartItemRepo.findAllByCart_id(cartId);
+       return cartItems
+                .stream()
+                .map(item -> modelMapper
+                        .map(item, CartItemDto.class)).toList();
 
     }
 
 //--------------------------------------------------------------------------------------------------
 
     @Override
-    public List<CartItem> getAllCartItems(){
-        return cartItemRepo.findAll();
-
+    public CartItemDto getCartItemByProductname(Long userId, String productName){
+        Cart cart=cartService.getCartByUserId(userId);
+       Product product=productService.getProductByName(productName);
+        CartItem cartItem= cartItemRepo.findByProductIdAndCartId(product.getId(), cart.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("There is no Cart item with name "+productName));
+        return modelMapper.map(cartItem, CartItemDto.class);
     }
-
 }

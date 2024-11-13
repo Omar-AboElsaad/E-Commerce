@@ -12,4 +12,10 @@ public interface IOrderService {
     List<OrderDto> getAllUserOrdersDto(Long userId);
 
     List<Orders> getAllUserOrders(Long userId);
+
+    //----------------------------------------------------------------------------------------------------------------------
+    void DeleteOrder(Long userId, Long orderId);
+
+    //----------------------------------------------------------------------------------------------------------------------
+    OrderDto convertOrederToOrderDto(Orders orders);
 }

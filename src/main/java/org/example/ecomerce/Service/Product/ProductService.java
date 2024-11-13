@@ -1,6 +1,7 @@
 package org.example.ecomerce.Service.Product;
 
 import lombok.RequiredArgsConstructor;
+import org.example.ecomerce.CustomExceptions.ResourceAlreadyExistException;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
 import org.example.ecomerce.DTO.ImageDto;
 import org.example.ecomerce.DTO.ProductDto;
@@ -58,8 +59,9 @@ public class ProductService implements IProductService {
 //----------------------------------------------------------------------------------------------------------------------
 
     @Override
-    public List<Product> getProductByName(String name) {
-        return productRepo.getProductByName(name);
+    public Product getProductByName(String name) {
+        return productRepo.getProductByName(name)
+                .orElseThrow(() -> new ResourceNotFoundException("There is no Product with name "+name));
     }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -80,6 +82,9 @@ public class ProductService implements IProductService {
 
     @Override
     public Product addProduct(AddProductRequest request) {
+        if(isProductExist(request)){
+            throw new ResourceAlreadyExistException(request.getBrand()+" "+request.getName()+" already exists, you can update it instead!");
+        }
         Category category=createOrGetCategory(request.getCategory().getName());
        return productRepo.save(createProduct(request,category));
     }
@@ -104,6 +109,14 @@ public class ProductService implements IProductService {
 
         );
     }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+    private boolean isProductExist(AddProductRequest request) {
+       return productRepo.existsByNameAndBrand(request.getName(),request.getBrand());
+    }
+
+
 //----------------------------------------------------------------------------------------------------------------------
 
     private Product updateExistingProduct(Product existingProduct, UpdateProductRequest request){

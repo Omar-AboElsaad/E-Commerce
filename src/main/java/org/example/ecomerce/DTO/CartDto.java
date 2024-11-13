@@ -12,5 +12,5 @@ public class CartDto {
     private Long id;
     private Long userId;
     private BigDecimal TotalAmounts = BigDecimal.ZERO;
-    private Set<CartItemDto> cartItemsDto = new HashSet<>();  //Set is a collection that contains no duplicate elements
+    private Set<CartItemDto> cartItems = new HashSet<>();  //Set is a collection that contains no duplicate elements
 }

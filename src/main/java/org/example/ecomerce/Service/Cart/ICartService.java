@@ -8,15 +8,15 @@ import java.math.BigDecimal;
 
 public interface ICartService {
 
-    public Cart getcart(Long id);
+     Cart getcart(Long id);
 
-    Long createNewCart(Long userId);
+    Cart createNewCart(Long userId);
 
-    public void clearCart(Long id);
+     void clearCart(Long id);
 
     void deleteCart(Long id);
 
-    public BigDecimal getTotalPrice(Long id);
+     BigDecimal getTotalPrice(Long id);
 
     void addItemToCart(Cart cart, CartItem item);
 
@@ -25,5 +25,5 @@ public interface ICartService {
     //This Method Used in anywhere we change in cart items because it recalculates Total Prices for all Cart Items
     void updateCartTotalAmount(Cart cart);
 
-    CartDto getCartByUserId(Long userId);
+    CartDto getCartDTOByUserId(Long userId);
 }

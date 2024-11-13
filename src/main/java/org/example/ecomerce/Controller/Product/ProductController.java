@@ -1,5 +1,6 @@
 package org.example.ecomerce.Controller.Product;
 import lombok.RequiredArgsConstructor;
+import org.example.ecomerce.CustomExceptions.ResourceAlreadyExistException;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
 import org.example.ecomerce.DTO.ProductDto;
 import org.example.ecomerce.Entity.Product;
@@ -11,23 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+
+import static org.springframework.http.HttpStatus.*;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.prefix}/products")
 public class ProductController{
     private final ProductService productService;
-
-//-------------------------------------------------------------------------------------------------
-
-
-    @GetMapping("/welcome")
-    public String getHello(){
-        return "Hello man";
-
-    }
 
 //-------------------------------------------------------------------------------------------------
 
@@ -119,16 +111,12 @@ public class ProductController{
     @GetMapping("/get-by-name")
     public ResponseEntity<ApiResponse> getProductByName(@RequestParam String name) {
         try {
-            List<Product> products= productService.getProductByName(name);
-            List<ProductDto> convertedProducts=productService.convertedListProducts(products);
-
-            if(products.isEmpty()){
-                return ResponseEntity.status(NOT_FOUND)
-                        .body(new ApiResponse("There is no Product with name "+name, null));
-            }
+            Product products= productService.getProductByName(name);
+            ProductDto convertedProducts=productService.convertToDTO(products);
             return ResponseEntity.ok().body(new ApiResponse("Found!",convertedProducts));
-        }catch (Exception e){
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(),null));
+
+        }catch (ResourceNotFoundException e){
+            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(),null));
         }
     }
 
@@ -172,8 +160,8 @@ public class ProductController{
       try {
           Product product= productService.addProduct(newProduct);
          return ResponseEntity.ok().body(new ApiResponse("Add product success!",product));
-      }catch (Exception e){
-        return    ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(),null));
+      }catch (ResourceAlreadyExistException e){
+        return    ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(),null));
       }
 
     }

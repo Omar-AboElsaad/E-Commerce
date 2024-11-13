@@ -13,4 +13,6 @@ public interface OrderRepo extends JpaRepository<Orders,Long> {
 
     @Query("Select o FROM Orders o WHERE o.user.id = :userId AND o.id = :orderId")
     Optional<Orders> findByUserIdAndOrderId(@Param("userId") Long userId, @Param("orderId") Long orderId);
+
+    void deleteAllByUserId(Long userId);
 }

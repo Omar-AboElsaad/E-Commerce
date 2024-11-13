@@ -1,5 +1,6 @@
 package org.example.ecomerce.Service.Order;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
 import org.example.ecomerce.DTO.CartDto;
@@ -34,15 +35,21 @@ public class OrderService implements IOrderService{
 
     @Override
     public OrderDto placeOrder(Long userId) {
-       CartDto cart=cartService.getCartByUserId(userId);
+       CartDto cart=cartService.getCartDTOByUserId(userId);
+       if(cart.getCartItems().isEmpty()){
+           throw new ResourceNotFoundException("There no items to be Ordered");
+       }
        Orders orders = createOrder(cart);
        List <OrderItem> orderItem=createOrderItems(cart, orders);
        orders.setOrderItems(new HashSet<>(orderItem));
        orders.setOrderTotalAmounts(calculateTotalAmount(orders));
+
        orderRepo.save(orders);
        cartService.clearCart(cart.getId());
+
+
        OrderDto orderDto=convertOrederToOrderDto(orders);
-       orderDto.setOrderItemsDTO(new HashSet<>(convertOrderItemToOrderItemDto(orderItem)));
+       orderDto.setOrderItems(convertOrderItemToOrderItemDto(orderItem));
         return orderDto;
     }
 
@@ -63,7 +70,7 @@ public class OrderService implements IOrderService{
 //----------------------------------------------------------------------------------------------------------------------
 
     private List<OrderItem> createOrderItems(CartDto cart, Orders orders){
-      return cart.getCartItemsDto().stream().map(item -> {
+      return cart.getCartItems().stream().map(item -> {
                 Product product=productService.getProductById(item.getProductId());
                 product.setStock(product.getStock()-item.getQuantity());
                 productRepo.save(product);
@@ -104,11 +111,14 @@ public class OrderService implements IOrderService{
 
     @Override
     public List<OrderDto> getAllUserOrdersDto(Long userId){
-       List<Orders> orders= orderRepo.findAllByUserId(userId);
+       List<Orders> orders= getAllUserOrders(userId);
+       if(orders.isEmpty()){
+           throw new ResourceNotFoundException("There is no Orders yet!");
+       }
       return orders.stream().map(order -> {
         OrderDto orderDto=  convertOrederToOrderDto(order);
         List<OrderItemDto> orderItemDto=  convertOrderItemToOrderItemDto(order.getOrderItems().stream().toList()) ;
-        orderDto.setOrderItemsDTO(new HashSet<>(orderItemDto));
+        orderDto.setOrderItems(orderItemDto);
         return orderDto;
       } ).toList();
     }
@@ -120,13 +130,14 @@ public class OrderService implements IOrderService{
     }
 
 //----------------------------------------------------------------------------------------------------------------------
-
+    @Override
     public void DeleteOrder(Long userId,Long orderId){
        Orders orders= orderRepo.findByUserIdAndOrderId(userId,orderId)
                .orElseThrow(() -> new ResourceNotFoundException("There no Order with id "+orderId+" For This user"));
        orderRepo.delete(orders);
     }
 //----------------------------------------------------------------------------------------------------------------------
+    @Override
     public OrderDto convertOrederToOrderDto(Orders orders ){
        return modelMapper.map(orders,OrderDto.class);
     }
@@ -135,4 +146,11 @@ public class OrderService implements IOrderService{
         return orderItem.stream().map(item -> modelMapper.map(item, OrderItemDto.class)).toList();
     }
 //----------------------------------------------------------------------------------------------------------------------
+    @Transactional
+    public void DeleteAll(Long userId){
+        orderRepo.deleteAllByUserId(userId);
+    }
+
+
+
 }

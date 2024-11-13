@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
 import org.example.ecomerce.DTO.CartDto;
 import org.example.ecomerce.DTO.CartItemDto;
-import org.example.ecomerce.DTO.OrderDto;
-import org.example.ecomerce.DTO.OrderItemDto;
 import org.example.ecomerce.Entity.Cart;
 import org.example.ecomerce.Entity.CartItem;
 import org.example.ecomerce.Entity.User;
@@ -32,26 +30,35 @@ public class CartService implements ICartService {
 
 
     @Override
-    public CartDto getCartByUserId(Long userId) {
+    public CartDto getCartDTOByUserId(Long userId) {
         Cart cart= cartRepo.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("There is no Cart For User "+ userId));
 
         CartDto cartDto= convertCartToCartDto(cart);
-        cartDto.setCartItemsDto(new HashSet<>(convertCartItemToCartItemDto(cart.getCartItems())) );
+        cartDto.setCartItems(new HashSet<>(convertCartItemToCartItemDto(cart.getCartItems())) );
         return cartDto;
     }
+
+    //--------------------------------------------------------------------------------------------------
+
+
+    public Cart getCartByUserId(Long userId) {
+        return cartRepo.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("There is no Cart For User "+ userId));
+    }
+
 
 
 //--------------------------------------------------------------------------------------------------
 
 
     @Override
-    public Long createNewCart(Long userId){
+    public Cart createNewCart(Long userId){
         User user=userService.getUserById(userId);
         Cart cart=new Cart();
         cart.setUser(user);
         cartRepo.save(cart);
-        return cart.getId();
+        return cart;
     }
 
 
