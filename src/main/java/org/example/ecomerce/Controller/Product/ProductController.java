@@ -38,7 +38,7 @@ public class ProductController{
 //-------------------------------------------------------------------------------------------------
 
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse> getAllProducts() throws IOException {
+    public ResponseEntity<ApiResponse> getAllProducts() {
         try {
             List<Product> products= productService.getAllProducts();
             List<ProductDto> convertedProducts=productService.convertedListProducts(products);

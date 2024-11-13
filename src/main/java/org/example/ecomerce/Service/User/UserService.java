@@ -8,7 +8,6 @@ import org.example.ecomerce.Entity.User;
 import org.example.ecomerce.Repository.UserRepo;
 import org.example.ecomerce.Requests.User.createUserRequest;
 import org.example.ecomerce.Requests.User.updateUserRequest;
-import org.example.ecomerce.Service.Cart.CartService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
