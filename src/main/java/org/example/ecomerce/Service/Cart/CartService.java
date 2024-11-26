@@ -2,14 +2,17 @@ package org.example.ecomerce.Service.Cart;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.ecomerce.CustomExceptions.ResourceAlreadyExistException;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
 import org.example.ecomerce.DTO.CartDto;
 import org.example.ecomerce.DTO.CartItemDto;
 import org.example.ecomerce.Entity.Cart;
 import org.example.ecomerce.Entity.CartItem;
+import org.example.ecomerce.Entity.Role;
 import org.example.ecomerce.Entity.User;
 import org.example.ecomerce.Repository.CartItemRepo;
 import org.example.ecomerce.Repository.CartRepo;
+import org.example.ecomerce.Repository.RolesRepo;
 import org.example.ecomerce.Service.User.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class CartService implements ICartService {
     private final CartItemRepo cartItemRepo;
     private final UserService userService;
     private final ModelMapper modelMapper;
+
 
 //--------------------------------------------------------------------------------------------------
 
@@ -55,10 +59,15 @@ public class CartService implements ICartService {
     @Override
     public Cart createNewCart(Long userId){
         User user=userService.getUserById(userId);
-        Cart cart=new Cart();
-        cart.setUser(user);
-        cartRepo.save(cart);
-        return cart;
+        if(cartRepo.findByUserId(userId).isEmpty()){
+            Cart cart=new Cart();
+            cart.setUser(user);
+            cartRepo.save(cart);
+            return cart;
+        }else {
+            throw new ResourceAlreadyExistException("User Already have cart");
+        }
+
     }
 
 

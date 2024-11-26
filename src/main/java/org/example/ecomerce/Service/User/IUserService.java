@@ -9,7 +9,7 @@ public interface IUserService {
 
      User getUserById(Long userId);
 
-     User createUser(createUserRequest request);
+     User createUser(createUserRequest request,String role);
 
      User updateUser(updateUserRequest request, Long userId);
 
@@ -17,4 +17,6 @@ public interface IUserService {
 
 
     UserDto ConvertUserToUserDto(User user);
+
+    User getAuthenticatedUser();
 }

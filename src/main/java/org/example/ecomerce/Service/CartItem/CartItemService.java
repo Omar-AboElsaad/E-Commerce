@@ -70,14 +70,15 @@ public class CartItemService implements ICartItemService {
         @Override
         public void updateItemQuantity(Long userId, Long itemId, int Quantity) {
             Cart cart=cartService.getCartByUserId(userId);
-            cart.getCartItems()
+            CartItem Item= cart.getCartItems()
                     .stream()
                     .filter(item->item.getProduct().getId().equals(itemId))
-                    .findFirst().ifPresent(item->{
-                        item.setQuantity(Quantity);
-                        item.setUnitPrice(item.getProduct().getPrice());
-                        item.setTotalPrice();
-                    });
+                    .findFirst().orElseThrow(() -> new ResourceNotFoundException("There is no Product With id "+itemId +" in Cart"));
+
+            Item.setQuantity(Quantity);
+            Item.setUnitPrice(Item.getProduct().getPrice());
+            Item.setTotalPrice();
+
           BigDecimal TotalAmount=cart.getCartItems().stream().map(cartItem ->
           {
               BigDecimal unitPrice=cartItem.getUnitPrice();

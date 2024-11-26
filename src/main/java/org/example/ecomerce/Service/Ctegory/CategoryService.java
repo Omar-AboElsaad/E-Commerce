@@ -28,7 +28,9 @@ public class CategoryService implements ICategory{
 
     @Override
     public List<Category> getAllCategories() {
-        return categoryRepo.findAll();
+        List<Category> categories= categoryRepo.findAll();
+
+        return categories;
     }
 
 //----------------------------------------------------------------------------------------------------------------------

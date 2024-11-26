@@ -9,6 +9,7 @@ import org.example.ecomerce.Requests.Product.UpdateProductRequest;
 import org.example.ecomerce.Response.ApiResponse;
 import org.example.ecomerce.Service.Product.ProductService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class ProductController{
     private final ProductService productService;
 
 //-------------------------------------------------------------------------------------------------
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}/product")
     public ResponseEntity<ApiResponse> getProductById(@PathVariable Long id){
         try {
@@ -68,7 +69,7 @@ public class ProductController{
     }
 
 //-------------------------------------------------------------------------------------------------
-
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/productbybrand")
     public ResponseEntity<ApiResponse> getProductByBrand(@RequestParam String brandName) {
         try {
@@ -153,7 +154,7 @@ public class ProductController{
     }
 
 //-------------------------------------------------------------------------------------------------
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addProduct(@RequestBody AddProductRequest newProduct) {
       try {
@@ -166,7 +167,7 @@ public class ProductController{
     }
 
 //-------------------------------------------------------------------------------------------------
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/update")
     public ResponseEntity<ApiResponse> updateProduct(@RequestBody UpdateProductRequest request) {
         try {
@@ -178,7 +179,7 @@ public class ProductController{
     }
 
 //-------------------------------------------------------------------------------------------------
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Long id){
         try {

@@ -2,9 +2,11 @@ package org.example.ecomerce.Controller.OrderItem;
 
 import lombok.RequiredArgsConstructor;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
+import org.example.ecomerce.Entity.User;
 import org.example.ecomerce.Response.ApiResponse;
 import org.example.ecomerce.Service.OrderItem.IOrderItemService;
 import org.example.ecomerce.Service.OrderItem.OrderItemService;
+import org.example.ecomerce.Service.User.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,11 +22,13 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class OrderItemController {
 
     private final OrderItemService orderItemService;
+    private final UserService userService;
 
     @DeleteMapping("/Delete-by-id")
-    public ResponseEntity<ApiResponse> deleteOrderItem(@RequestParam Long itemId,@RequestParam Long userId){
+    public ResponseEntity<ApiResponse> deleteOrderItem(@RequestParam Long itemId){
        try {
-           orderItemService.deleteOrderItemById(itemId,userId);
+           User user=userService.getAuthenticatedUser();
+           orderItemService.deleteOrderItemById(itemId,user.getId());
            return ResponseEntity.ok().body(new ApiResponse("Deleted Successfully!",null));
        }catch (ResourceNotFoundException e){
            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));

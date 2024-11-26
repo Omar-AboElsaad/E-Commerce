@@ -29,12 +29,12 @@ public class CartItemController{
 //----------------------------------------------------------------------------------------------------------------------
 
     @PostMapping("/add-item-to-cart")
-    public  ResponseEntity<ApiResponse> addItemToCart(@RequestParam Long userId,
+    public  ResponseEntity<ApiResponse> addItemToCart(
                                                       @RequestParam Long productId,
                                                       @RequestParam int quantity) {
         try {
-            //First Check if The user exists
-            User user= userService.getUserById(userId);
+            //First Get User who logged in
+            User user= userService.getAuthenticatedUser();
 
             cartItemService.addItemToCart( user.getId(), productId, quantity);
             return ResponseEntity.ok()
@@ -49,10 +49,10 @@ public class CartItemController{
 
 
     @DeleteMapping("/remove-item-from-cart")
-    public ResponseEntity<ApiResponse> removeItemFromCart(@RequestParam Long userId, @RequestParam Long itemId) {
+    public ResponseEntity<ApiResponse> removeItemFromCart( @RequestParam Long itemId) {
         try {
-            //First Check if The user exists
-            User user= userService.getUserById(userId);
+            //First Get User who logged In
+            User user= userService.getAuthenticatedUser();
 
             cartItemService.removeItemFromCart(user.getId(),itemId);
             return ResponseEntity.ok()
@@ -68,13 +68,13 @@ public class CartItemController{
 
 
     @PutMapping("/update-item-quantity")
-    public ResponseEntity<ApiResponse> updateItemQuantity(@RequestParam Long userId,
+    public ResponseEntity<ApiResponse> updateItemQuantity(
                                                           @RequestParam Long itemId,
                                                           @RequestParam int Quantity) {
 
         try {
-            //First Check if The user exists
-            User user= userService.getUserById(userId);
+            //First Get User who logged
+            User user= userService.getAuthenticatedUser();
 
             cartItemService.updateItemQuantity(user.getId(), itemId,  Quantity);
             return ResponseEntity.ok()
@@ -90,10 +90,10 @@ public class CartItemController{
 
 
     @GetMapping("/getCartItemByItemId")
-    public ResponseEntity<ApiResponse> getCartItemByProductId(@RequestParam Long userId,@RequestParam Long productId) {
+    public ResponseEntity<ApiResponse> getCartItemByProductId(@RequestParam Long productId) {
         try {
-            //First Check if The user exists
-            User user= userService.getUserById(userId);
+            //First Get User who logged in
+            User user= userService.getAuthenticatedUser();
 
             CartItemDto cartItem= cartItemService.getCartItemByProductId(user.getId(),  productId);
             return ResponseEntity.ok()
@@ -108,10 +108,10 @@ public class CartItemController{
 
 
     @GetMapping("/get-CartItem-By-product-name")
-    public ResponseEntity<ApiResponse> getCartItemByProductName(@RequestParam Long userId,@RequestParam String productName) {
+    public ResponseEntity<ApiResponse> getCartItemByProductName(@RequestParam String productName) {
         try {
-            //First Check if The user exists
-            User user= userService.getUserById(userId);
+            //First Get User who logged in
+            User user= userService.getAuthenticatedUser();
 
             //Second get Product if exists
             CartItemDto cartItem= cartItemService.getCartItemByProductname(user.getId(),  productName);
@@ -126,9 +126,9 @@ public class CartItemController{
 //----------------------------------------------------------------------------------------------------------------------
 
     @GetMapping("/all")
-    public List<CartItemDto> getAll(Long userId) {
-        //First Check if The user exists
-        User user= userService.getUserById(userId);
+    public List<CartItemDto> getAll() {
+        //First Get User who logged in
+        User user= userService.getAuthenticatedUser();
 
         Cart cart=cartService.getCartByUserId(user.getId());
         return cartItemService.getAllCartItems(cart.getId());

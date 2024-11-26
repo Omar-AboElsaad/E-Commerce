@@ -12,6 +12,7 @@ import org.example.ecomerce.Response.ApiResponse;
 import org.example.ecomerce.Service.Cart.CartService;
 import org.example.ecomerce.Service.User.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -19,12 +20,13 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.prefix}/user")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
+
 public class UserController {
     private final UserService userService;
     private final CartService cartService;
 
 //-------------------------------------------------------------------------------------------------
-
 
     @GetMapping("/get-by-id")
     public ResponseEntity<ApiResponse> getUserById(@RequestParam Long userId) {
@@ -43,11 +45,10 @@ public class UserController {
 
 //-------------------------------------------------------------------------------------------------
 
-
     @PostMapping("/add-user")
-    public ResponseEntity<ApiResponse> createUser(@RequestBody createUserRequest request) {
+    public ResponseEntity<ApiResponse> createUser(@RequestBody createUserRequest request,@RequestParam String role) {
         try {
-            User user=userService.createUser(request);
+            User user=userService.createUser(request,role);
             //Auto Generate Cart for New user
             user.setCart(cartService.createNewCart(user.getId()));
             //convert user to user DTO
@@ -64,7 +65,6 @@ public class UserController {
 
 //-------------------------------------------------------------------------------------------------
 
-
     @PutMapping("/update-user")
     public ResponseEntity<ApiResponse> updateUser(@RequestBody updateUserRequest request,@RequestParam Long userId) {
         try {
@@ -79,7 +79,6 @@ public class UserController {
     }
 
 //-------------------------------------------------------------------------------------------------
-
 
    @DeleteMapping("/Delete")
     public ResponseEntity<ApiResponse> removeUser(@RequestParam Long userId) {

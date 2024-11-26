@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.ecomerce.CustomExceptions.ResourceNotFoundException;
 import org.example.ecomerce.DTO.OrderDto;
 import org.example.ecomerce.Entity.Orders;
+import org.example.ecomerce.Entity.User;
 import org.example.ecomerce.Response.ApiResponse;
 import org.example.ecomerce.Service.Order.OrderService;
 import org.example.ecomerce.Service.User.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,9 +26,10 @@ public class OrderController {
 //-------------------------------------------------------------------------------------------------
 
     @PostMapping("/place-order")
-    public ResponseEntity<ApiResponse> placeOrder(@RequestParam Long userId) {
+    public ResponseEntity<ApiResponse> placeOrder() {
           try {
-              OrderDto orderDto =orderService.placeOrder(userId);
+              User user=userService.getAuthenticatedUser();
+              OrderDto orderDto =orderService.placeOrder(user.getId());
                 return ResponseEntity.ok().body(new ApiResponse("Order added Successfully!", orderDto));
             }catch (ResourceNotFoundException e){
                 return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(),null));
@@ -35,7 +38,7 @@ public class OrderController {
     }
 
 //-------------------------------------------------------------------------------------------------
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/get-by-id")
     public ResponseEntity<ApiResponse> getOrder(@RequestParam Long orderId) {
         try {
@@ -50,9 +53,10 @@ public class OrderController {
 //-------------------------------------------------------------------------------------------------
 
     @GetMapping("/get-all-orders")
-    public ResponseEntity<ApiResponse> getAllUserOrders(@RequestParam Long userId) {
+    public ResponseEntity<ApiResponse> getAllUserOrders() {
         try {
-           List<OrderDto> orders=orderService.getAllUserOrdersDto(userId);
+            User user=userService.getAuthenticatedUser();
+           List<OrderDto> orders=orderService.getAllUserOrdersDto(user.getId());
             return ResponseEntity.ok().body(new ApiResponse("Orders Found!",orders));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(),null));
@@ -60,21 +64,26 @@ public class OrderController {
     }
 
 //-------------------------------------------------------------------------------------------------
-   @DeleteMapping("/delete-by-userid-and-orderid")
-    public ResponseEntity<ApiResponse> deleteOrder(@RequestParam Long userId,@RequestParam Long orderId){
+
+    @DeleteMapping("/delete-by-userid-and-orderid")
+    public ResponseEntity<ApiResponse> deleteOrder(@RequestParam Long orderId){
         try {
-            orderService.DeleteOrder(userId,orderId);
+            User user=userService.getAuthenticatedUser();
+            orderService.DeleteOrder(user.getId(),orderId);
             return ResponseEntity.ok().body(new ApiResponse("Order Deleted Successfully!",null));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
+//-------------------------------------------------------------------------------------------------
+
     @DeleteMapping("/delete-all-user-orders")
-    public ResponseEntity<ApiResponse> DeleteAll(@RequestParam Long userId){
+    public ResponseEntity<ApiResponse> DeleteAll(){
         try {
-            userService.getUserById(userId);
-            orderService.DeleteAll(userId);
+            User user=userService.getAuthenticatedUser();
+            userService.getUserById(user.getId());
+            orderService.DeleteAll(user.getId());
             return ResponseEntity.ok().body(new ApiResponse("All orders Deleted !",null));
         }catch (ResourceNotFoundException e){
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
